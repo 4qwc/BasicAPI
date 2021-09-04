@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:layout/pages/detail.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:async';
+
 class HomePage extends StatefulWidget {
   // const HomePage({ Key? key }) : super(key: key);
 
@@ -21,23 +24,23 @@ class _HomePageState extends State<HomePage> {
             //เอา padding มาครอบ Listview
             padding: EdgeInsets.all(20.0),
             child: FutureBuilder(
-              builder: (context, snapshot) {
-                var data = json.decode(snapshot.data
-                    .toString()); //[{คอมพิวเตอร์คืออะไร...},{},{},{}]
+              builder: (context, AsyncSnapshot snapshot) {
+                // var data = json.decode(snapshot.data
+                // .toString()); //[{คอมพิวเตอร์คืออะไร...},{},{},{}]
                 return ListView.builder(
                   itemBuilder: (BuildContext context, int index) {
                     return MyBox(
-                        data[index]['title'],
-                        data[index]['subtitle'],
-                        data[index]['image_url'],
-                        data[index]['detail']); //เพิ่ม detail
+                        snapshot.data[index]['title'],
+                        snapshot.data[index]['subtitle'],
+                        snapshot.data[index]['image_url'],
+                        snapshot.data[index]['detail']); //เพิ่ม detail
                   },
-                  itemCount: data.length,
+                  itemCount: snapshot.data.length,
                 );
               },
               //future คือ ฟังก์ชั่นพิเศษ โหลดข้อมูลจาก .json
-              future:
-                  DefaultAssetBundle.of(context).loadString('assets/data.json'),
+              future: getData(),
+              // DefaultAssetBundle.of(context).loadString('assets/data.json'),
             )));
   }
 
@@ -92,5 +95,15 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Future getData() async {
+    //https://raw.githubusercontent.com/4qwc/BasicAPI/main/data.json
+    // https://raw.githubusercontent.com/UncleEngineer/BasicAPI/main/data.json
+    var url =
+        Uri.https('raw.githubusercontent.com', '/4qwc/BasicAPI/main/data.json');
+    var response = await http.get(url);
+    var result = json.decode(response.body);
+    return result;
   }
 }
